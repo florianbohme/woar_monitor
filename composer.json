@@ -1,0 +1,21 @@
+{
+    "name": "woar/woar_monitor",
+    "description": "Tokengeschützter, ausschließlich lesender Statusendpunkt für die Monitoring-Zentrale.",
+    "type": "drupal-custom-module",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.1"
+    },
+    "require-dev": {
+        "drupal/coder": "^8.3",
+        "squizlabs/php_codesniffer": "^3.7"
+    },
+    "scripts": {
+        "cs": "phpcs --standard=Drupal,DrupalPractice --extensions=php,module,install,inc,yml --ignore=vendor ."
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}

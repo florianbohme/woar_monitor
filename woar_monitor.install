@@ -1,0 +1,88 @@
+<?php
+
+/**
+ * @file
+ * Installations- und Deinstallationsvorgänge für WOAR Monitor.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Site\Settings;
+use Drupal\Core\Url;
+use Drupal\woar_monitor\Access\TokenAccessCheck;
+
+/**
+ * Implements hook_uninstall().
+ *
+ * Beim Deinstallieren wird das Token gelöscht. Andernfalls bliebe ein
+ * gültiges Zugangsgeheimnis in der Datenbank zurück, das niemand mehr auf dem
+ * Schirm hat — und das beim erneuten Installieren stillschweigend wieder
+ * scharf wäre.
+ */
+function woar_monitor_uninstall(): void {
+  \Drupal::state()->delete(TokenAccessCheck::STATE_KEY);
+}
+
+/**
+ * Implements hook_requirements().
+ *
+ * Weist auf der Statusseite darauf hin, wenn kein Token hinterlegt ist. Sonst
+ * fällt erst in der Zentrale auf, dass die Website keine Auskunft gibt.
+ */
+function woar_monitor_requirements(string $phase): array {
+  if ($phase !== 'runtime') {
+    return [];
+  }
+
+  $token = (string) \Drupal::state()->get(TokenAccessCheck::STATE_KEY, '');
+  $ausSettings = (string) Settings::get(TokenAccessCheck::SETTINGS_KEY, '');
+
+  if ($ausSettings !== '') {
+    return [
+      'woar_monitor_token' => [
+        'title' => t('WOAR Monitor'),
+        'value' => t('Token aus settings.php hinterlegt, Endpunkt aktiv.'),
+        'severity' => REQUIREMENT_OK,
+      ],
+    ];
+  }
+
+  if ($token !== '') {
+    $vermerkt = (string) \Drupal::state()->get(TokenAccessCheck::STATE_SITE_KEY, '');
+    $aktuell = (string) \Drupal::config('system.site')->get('uuid');
+
+    // Der wichtige Fall: Der State dieser Website stammt aus einem anderen
+    // Projekt. Dann gehört das Token dorthin und darf hier nicht gelten.
+    if ($vermerkt !== '' && $vermerkt !== $aktuell) {
+      return [
+        'woar_monitor_token' => [
+          'title' => t('WOAR Monitor'),
+          'value' => t('Token gehört zu einer anderen Website'),
+          'description' => t('Das hinterlegte Token wurde für eine andere Website vergeben und gilt hier nicht — der Endpunkt bleibt so lange geschlossen. Im Monitor auf <em>Neu verbinden</em> klicken und den Code von <a href=":url">dieser Seite</a> eintragen.', [
+            ':url' => Url::fromRoute('woar_monitor.settings')->toString(),
+          ]),
+          'severity' => REQUIREMENT_WARNING,
+        ],
+      ];
+    }
+
+    return [
+      'woar_monitor_token' => [
+        'title' => t('WOAR Monitor'),
+        'value' => t('Token hinterlegt, Endpunkt aktiv.'),
+        'severity' => REQUIREMENT_OK,
+      ],
+    ];
+  }
+
+  return [
+    'woar_monitor_token' => [
+      'title' => t('WOAR Monitor'),
+      'value' => t('Kein Token hinterlegt'),
+      'description' => t('Der Statusendpunkt weist jeden Zugriff ab, bis unter <a href=":url">Einstellungen</a> ein Token gesetzt wurde.', [
+        ':url' => Url::fromRoute('woar_monitor.settings')->toString(),
+      ]),
+      'severity' => REQUIREMENT_WARNING,
+    ],
+  ];
+}

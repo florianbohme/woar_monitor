@@ -1,0 +1,28 @@
+services:
+  woar_monitor.token_access:
+    class: Drupal\woar_monitor\Access\TokenAccessCheck
+    arguments:
+      - '@state'
+      - '@flood'
+      - '@request_stack'
+      - '@config.factory'
+      - '@logger.factory'
+    tags:
+      - { name: access_check, applies_to: _woar_monitor_token }
+
+  woar_monitor.status_collector:
+    class: Drupal\woar_monitor\StatusCollector
+    arguments:
+      - '@state'
+      - '@module_handler'
+      - '@extension.list.module'
+      - '@config.factory'
+
+  woar_monitor.pairing:
+    class: Drupal\woar_monitor\PairingService
+    arguments:
+      - '@state'
+      - '@config.factory'
+      - '@logger.factory'
+      - '@request_stack'
+      - '@flood'

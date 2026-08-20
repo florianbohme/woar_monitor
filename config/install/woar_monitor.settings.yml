@@ -1,0 +1,7 @@
+# Leere Freigabeliste bedeutet: keine Einschränkung nach IP-Adresse.
+ip_allowlist: {  }
+# Die Zentrale fragt alle sechs Stunden ab. 60 Abrufe je Stunde lassen
+# Nachfragen und manuelles Prüfen zu, ohne den Endpunkt zum Werkzeug zu machen.
+requests_per_hour: 60
+# Deutlich strenger: Wer das Token errät, soll dafür nicht viele Versuche haben.
+failed_auth_per_hour: 5

@@ -1,0 +1,36 @@
+woar_monitor.status:
+  path: '/woar-monitor/status'
+  defaults:
+    _controller: '\Drupal\woar_monitor\Controller\StatusController::status'
+  methods: [GET]
+  requirements:
+    # Eigene Zugangsprüfung: Token, Ratenbegrenzung, optionale IP-Freigabeliste.
+    # Ausdrücklich keine Drupal-Berechtigung — der Abruf erfolgt ohne Benutzer.
+    _woar_monitor_token: 'TRUE'
+  options:
+    no_cache: TRUE
+    # Auch im Wartungsmodus erreichbar. Gerade dann ist die Auskunft nützlich:
+    # Die Zentrale erfährt so, dass die Seite absichtlich offline ist.
+    _maintenance_access: TRUE
+
+woar_monitor.claim:
+  path: '/woar-monitor/claim'
+  defaults:
+    _controller: '\Drupal\woar_monitor\Controller\ClaimController::claim'
+  methods: [POST]
+  requirements:
+    # Kein Zugangsschutz auf Routenebene: Der Schutz ist der Kopplungscode
+    # selbst, und der wird im Controller geprüft — zusammen mit einer engen
+    # Ratenbegrenzung. Ohne gültigen Code gibt es hier nur 403.
+    _access: 'TRUE'
+  options:
+    no_cache: TRUE
+    _maintenance_access: TRUE
+
+woar_monitor.settings:
+  path: '/admin/config/system/woar-monitor'
+  defaults:
+    _form: '\Drupal\woar_monitor\Form\SettingsForm'
+    _title: 'WOAR Monitor'
+  requirements:
+    _permission: 'administer site configuration'

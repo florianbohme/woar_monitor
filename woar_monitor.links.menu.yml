@@ -1,0 +1,5 @@
+woar_monitor.settings:
+  title: 'WOAR Monitor'
+  description: 'Token und Zugriffsschutz für die Monitoring-Schnittstelle.'
+  route_name: woar_monitor.settings
+  parent: system.admin_config_system
