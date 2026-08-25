@@ -20,8 +20,8 @@ beeinflussbar wäre.
 
 ```json
 {
-  "schema": 3,
-  "agent_version": "1.2.0",
+  "schema": 4,
+  "agent_version": "1.3.0",
   "collected_at": "2026-08-20T06:52:16+00:00",
   "drupal":  { "core_version": "10.6.12", "maintenance_mode": false },
   "php":     { "version": "8.3.31" },
@@ -56,6 +56,11 @@ beeinflussbar wäre.
         "title": "Newsletter",
         "by_month": { "2026-08": 8, "2026-07": 5 }
       }
+    },
+    "known": {
+      "bewerbungsformular": "Bewerbungsformular",
+      "kontaktformular": "Kontaktformular",
+      "newsletter": "Newsletter"
     }
   }
 }
@@ -73,6 +78,12 @@ getrennt nach Formular. Die Aufschlüsselung gibt es, weil eine
 Newsletter-Anmeldung keine Anfrage ist: In der Zentrale wird je Website
 angehakt, welche Formulare als Anfrage zählen. Ohne diese Trennung stünde
 später eine Zahl im Kundenbericht, die bei der ersten Rückfrage auseinanderfällt.
+
+`known` listet **alle** vorhandenen Formulare, auch solche ohne eine einzige
+Einsendung — nur Kennung und Bezeichnung, keine Felder und keine
+Einstellungen. Der Grund: Ohne diese Liste ließe sich erst dann festlegen,
+dass ein Bewerbungsformular nicht als Anfrage zählt, wenn die erste Bewerbung
+schon eingegangen ist. Die hat die Zahl dann bereits verfälscht.
 
 Fehlt das Modul `webform`, steht `available: false` und beide Listen sind leer.
 Das ist kein Fehler — nicht jede Website hat Formulare.

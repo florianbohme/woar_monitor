@@ -99,7 +99,49 @@ final class FormStatsCollector {
       // Aufgeschlüsselt, damit in der Zentrale entschieden werden kann, welche
       // Formulare als Anfrage zählen. Ein Newsletter ist keine Anfrage.
       'by_form' => array_slice($jeFormular, 0, 30, TRUE),
+      // Alle vorhandenen Formulare, auch die ohne eine einzige Einsendung.
+      // Sonst lässt sich in der Zentrale erst dann festlegen, dass ein
+      // Formular nicht als Anfrage zählt, wenn die erste Einsendung schon
+      // da ist — und die hat die Zahl dann bereits verfälscht.
+      'known' => $this->alleFormulare(),
     ];
+  }
+
+  /**
+   * Alle auf dieser Website vorhandenen Formulare.
+   *
+   * Nur Kennung und Bezeichnung, keine Felder und keine Einstellungen.
+   *
+   * @return array<string, string>
+   */
+  private function alleFormulare(): array {
+    try {
+      $formulare = \Drupal::entityTypeManager()->getStorage('webform')->loadMultiple();
+    }
+    catch (\Throwable) {
+      return [];
+    }
+
+    $liste = [];
+
+    foreach ($formulare as $id => $webform) {
+      $id = (string) $id;
+
+      // Drupals eigene Systemformulare interessieren hier nicht.
+      if ($id === '' || str_starts_with($id, 'webform_')) {
+        continue;
+      }
+
+      $liste[$id] = mb_substr((string) $webform->label(), 0, 128);
+
+      if (count($liste) >= 50) {
+        break;
+      }
+    }
+
+    ksort($liste);
+
+    return $liste;
   }
 
   /**
@@ -129,6 +171,7 @@ final class FormStatsCollector {
       'reason' => $grund,
       'by_month' => [],
       'by_form' => [],
+      'known' => [],
     ];
   }
 
