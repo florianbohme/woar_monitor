@@ -10,6 +10,12 @@ services:
     tags:
       - { name: access_check, applies_to: _woar_monitor_token }
 
+  woar_monitor.form_stats:
+    class: Drupal\woar_monitor\FormStatsCollector
+    arguments:
+      - '@database'
+      - '@module_handler'
+
   woar_monitor.status_collector:
     class: Drupal\woar_monitor\StatusCollector
     arguments:
@@ -17,6 +23,7 @@ services:
       - '@module_handler'
       - '@extension.list.module'
       - '@config.factory'
+      - '@woar_monitor.form_stats'
 
   woar_monitor.pairing:
     class: Drupal\woar_monitor\PairingService

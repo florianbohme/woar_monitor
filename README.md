@@ -159,6 +159,34 @@ setzen (`git tag v1.0.1 && git push --tags`), dann in den Projekten:
     composer update woar/woar_monitor
     drush cr
 
+## Beim Deploy: Cache leeren ist Pflicht, nicht Kür
+
+    git pull
+    composer install
+    ./vendor/bin/drush cr     # <- ohne das ist die Website kaputt
+
+Der letzte Schritt ist keine Empfehlung. Verschiebt sich der Modulordner oder
+ändert sich eine Dienstdefinition, passt Drupals kompilierter Container nicht
+mehr zum Code — und **jeder Aufruf, der nicht aus dem Seiten-Cache kommt,
+scheitert mit einem Fehler 500**.
+
+Das ist tückisch, weil die Startseite dabei gesund aussieht: Sie wird
+zwischengespeichert ausgeliefert, während `/user/login` und der Adminbereich
+längst tot sind. Wer nur die Startseite prüft, hält den Deploy für geglückt.
+
+Ohne Drush im Pfad:
+
+    php vendor/bin/drush cr
+
+Bricht Drush selbst ab — auch das kommt vor, wenn der Container so kaputt ist,
+dass Drush ihn nicht laden kann —, hilft nur der Holzhammer: den Ordner
+`web/sites/default/files/php` löschen. Darin steht ausschließlich Erzeugtes,
+Drupal baut ihn beim nächsten Aufruf neu.
+
+**Nach dem Deploy kurz prüfen**, und zwar nicht die Startseite:
+
+    curl -o /dev/null -w "%{http_code}\n" https://deine-seite.de/user/login
+
 Kein Kopieren mehr, und du siehst in jeder `composer.lock`, welche Fassung auf
 welcher Website liegt.
 

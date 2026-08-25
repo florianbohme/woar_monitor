@@ -32,13 +32,14 @@ final class StatusCollector {
    * Erhöhen, sobald sich die Struktur ändert. Die Zentrale kann daran
    * erkennen, ob sie mit einem älteren Modul spricht.
    */
-  public const SCHEMA_VERSION = 1;
+  public const SCHEMA_VERSION = 2;
 
   public function __construct(
     private readonly StateInterface $state,
     private readonly ModuleHandlerInterface $moduleHandler,
     private readonly ModuleExtensionList $moduleList,
     private readonly ConfigFactoryInterface $configFactory,
+    private readonly FormStatsCollector $formStats,
   ) {}
 
   /**
@@ -68,6 +69,9 @@ final class StatusCollector {
         'last_run_at' => $this->zeitpunkt((int) $this->state->get('system.cron_last', 0)),
       ],
       'updates' => $this->updates(),
+      // Anzahl eingegangener Formularanfragen je Monat. Nur Zahlen, keine
+      // Inhalte — siehe FormStatsCollector.
+      'forms' => $this->formStats->collect(),
     ];
   }
 
