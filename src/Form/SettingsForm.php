@@ -94,16 +94,22 @@ final class SettingsForm extends ConfigFormBase {
     ];
 
     // Kopplung: der Weg, eine Website mit dem Monitor zu verbinden.
+    $moeglich = $this->pairing->isPossible();
+
     $form['kopplung'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Mit dem Monitor verbinden'),
-      '#description' => $this->t('Im Monitor die Website anlegen und dort auf <em>Verbinden</em> klicken. Hier einen Code erzeugen und drüben eintragen — mehr ist nicht zu tun. Der Code gilt 15 Minuten und genau einmal.'),
+      // Die Anleitung nur zeigen, wenn sie auch befolgt werden kann. Sonst
+      // steht "nicht möglich" direkt unter der Beschreibung, wie es geht.
+      '#description' => $moeglich
+        ? $this->t('Im Monitor die Website anlegen und dort auf <em>Verbinden</em> klicken. Hier einen Code erzeugen und drüben eintragen — mehr ist nicht zu tun. Der Code gilt 15 Minuten und genau einmal.')
+        : NULL,
     ];
 
-    if (!$this->pairing->isPossible()) {
+    if (!$moeglich) {
       $form['kopplung']['nicht_moeglich'] = [
         '#type' => 'item',
-        '#markup' => $this->t('Nicht möglich, solange das Token fest in <code>settings.php</code> steht — diese Website kann es nicht ändern. Trage es im Monitor von Hand ein.'),
+        '#markup' => $this->t('Diese Website hat ihr Token fest in <code>settings.php</code> stehen (<code>woar_monitor_token</code>) und kann es deshalb nicht selbst wechseln. Der Kopplungscode steht darum nicht zur Verfügung — die Verbindung läuft trotzdem, sie wurde nur von Hand eingerichtet.<br><br>Damit liegt das Token im Klartext in einer Datei, die üblicherweise im Git liegt. Sauberer ist der umgekehrte Weg: die Zeile aus <code>settings.php</code> entfernen, ausrollen, und die Website hier neu koppeln. Das Token steht dann in der Datenbank und wird beim Koppeln ohnehin durch ein neues ersetzt.'),
       ];
     }
     else {
