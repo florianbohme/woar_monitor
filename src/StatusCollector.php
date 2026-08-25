@@ -32,7 +32,7 @@ final class StatusCollector {
    * Erhöhen, sobald sich die Struktur ändert. Die Zentrale kann daran
    * erkennen, ob sie mit einem älteren Modul spricht.
    */
-  public const SCHEMA_VERSION = 2;
+  public const SCHEMA_VERSION = 3;
 
   public function __construct(
     private readonly StateInterface $state,

@@ -20,8 +20,8 @@ beeinflussbar wäre.
 
 ```json
 {
-  "schema": 1,
-  "agent_version": "1.0.0",
+  "schema": 3,
+  "agent_version": "1.2.0",
   "collected_at": "2026-08-20T06:52:16+00:00",
   "drupal":  { "core_version": "10.6.12", "maintenance_mode": false },
   "php":     { "version": "8.3.31" },
@@ -43,9 +43,39 @@ beeinflussbar wäre.
         "includes": ["node", "user", "views"]
       }
     ]
+  },
+  "forms": {
+    "available": true,
+    "by_month": { "2026-08": 20, "2026-07": 14 },
+    "by_form": {
+      "kontaktformular": {
+        "title": "Kontaktformular",
+        "by_month": { "2026-08": 12, "2026-07": 9 }
+      },
+      "newsletter": {
+        "title": "Newsletter",
+        "by_month": { "2026-08": 8, "2026-07": 5 }
+      }
+    }
   }
 }
 ```
+
+### Zu `forms`
+
+Gezählt werden abgeschickte Webform-Einsendungen der letzten 24 Monate,
+Entwürfe bleiben außen vor. **Nur Anzahlen — keine Inhalte, keine Namen, keine
+E-Mail-Adressen, keine Zeitpunkte einzelner Einsendungen.** Aus einer Zahl pro
+Monat lässt sich nichts über eine einzelne Person erfahren.
+
+`by_month` ist die Summe über alle Formulare, `by_form` dieselben Zahlen
+getrennt nach Formular. Die Aufschlüsselung gibt es, weil eine
+Newsletter-Anmeldung keine Anfrage ist: In der Zentrale wird je Website
+angehakt, welche Formulare als Anfrage zählen. Ohne diese Trennung stünde
+später eine Zahl im Kundenbericht, die bei der ersten Rückfrage auseinanderfällt.
+
+Fehlt das Modul `webform`, steht `available: false` und beide Listen sind leer.
+Das ist kein Fehler — nicht jede Website hat Formulare.
 
 Was der Endpunkt **nicht** liefert: Pfade, Datenbankangaben, Benutzer,
 E-Mail-Adressen, den Sitenamen, geladene PHP-Erweiterungen, Konfigurationswerte.
