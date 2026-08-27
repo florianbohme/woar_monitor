@@ -20,8 +20,8 @@ beeinflussbar wäre.
 
 ```json
 {
-  "schema": 4,
-  "agent_version": "1.3.0",
+  "schema": 5,
+  "agent_version": "1.4.0",
   "collected_at": "2026-08-20T06:52:16+00:00",
   "drupal":  { "core_version": "10.6.12", "maintenance_mode": false },
   "php":     { "version": "8.3.31" },
@@ -44,6 +44,14 @@ beeinflussbar wäre.
       }
     ]
   },
+  "tracking": {
+    "matomo_modul": true,
+    "site_id": "2",
+    "ausgenommene_rollen": ["authenticated", "admin"],
+    "angemeldete_ausgenommen": true,
+    "cookies_aus": true,
+    "do_not_track": true
+  },
   "forms": {
     "available": true,
     "by_month": { "2026-08": 20, "2026-07": 14 },
@@ -65,6 +73,16 @@ beeinflussbar wäre.
   }
 }
 ```
+
+### Zu `tracking`
+
+Ausschließlich Einstellungen, keine Daten: welche Rollen von der Zählung
+ausgenommen sind und ob angemeldete Benutzer mitgezählt werden.
+
+Der Grund: Die Zentrale kann in Matomo nachsehen, welche IP-Adressen dort
+ausgeschlossen sind — aber nicht, dass diese Website angemeldete Benutzer gar
+nicht erst zählt. Ohne diese Auskunft meldet sie einen Mangel, den es nicht
+gibt, und man geht ihm nach.
 
 ### Zu `forms`
 

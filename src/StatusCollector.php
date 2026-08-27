@@ -32,7 +32,7 @@ final class StatusCollector {
    * Erhöhen, sobald sich die Struktur ändert. Die Zentrale kann daran
    * erkennen, ob sie mit einem älteren Modul spricht.
    */
-  public const SCHEMA_VERSION = 4;
+  public const SCHEMA_VERSION = 5;
 
   public function __construct(
     private readonly StateInterface $state,
@@ -69,6 +69,7 @@ final class StatusCollector {
         'last_run_at' => $this->zeitpunkt((int) $this->state->get('system.cron_last', 0)),
       ],
       'updates' => $this->updates(),
+      'tracking' => $this->tracking(),
       // Anzahl eingegangener Formularanfragen je Monat. Nur Zahlen, keine
       // Inhalte — siehe FormStatsCollector.
       'forms' => $this->formStats->collect(),
@@ -209,6 +210,45 @@ final class StatusCollector {
   /**
    * Fassung dieses Moduls, damit die Zentrale veraltete Agenten erkennt.
    */
+  /**
+   * Wie die Website ihre Messung eingestellt hat.
+   *
+   * Ausschließlich Einstellungen, keine Daten: Welche Rollen von der Zählung
+   * ausgenommen sind und ob angemeldete Benutzer mitgezählt werden.
+   *
+   * Der Grund: Die Zentrale kann in Matomo nachsehen, welche IP-Adressen dort
+   * ausgeschlossen sind — aber nicht, dass diese Website angemeldete Benutzer
+   * gar nicht erst zählt. Ohne diese Auskunft meldet sie einen Mangel, den es
+   * nicht gibt, und man geht ihm nach.
+   */
+  private function tracking(): array {
+    if (!$this->moduleHandler->moduleExists('matomo')) {
+      return ['matomo_modul' => FALSE];
+    }
+
+    try {
+      $config = \Drupal::config('matomo.settings');
+      $modus = (int) $config->get('visibility.user_role_mode');
+      $rollen = array_values(array_filter((array) $config->get('visibility.user_role_roles')));
+    }
+    catch (\Throwable) {
+      return ['matomo_modul' => TRUE];
+    }
+
+    // Modus 1 heißt: alle außer den genannten Rollen werden gezählt.
+    // Steht "authenticated" darin, bleibt jeder Angemeldete außen vor.
+    $angemeldeteAusgenommen = $modus === 1 && in_array('authenticated', $rollen, TRUE);
+
+    return [
+      'matomo_modul' => TRUE,
+      'site_id' => $this->textOderNull($config->get('site_id')),
+      'ausgenommene_rollen' => array_slice($rollen, 0, 20),
+      'angemeldete_ausgenommen' => $angemeldeteAusgenommen,
+      'cookies_aus' => (bool) $config->get('privacy.disablecookies'),
+      'do_not_track' => (bool) $config->get('privacy.donottrack'),
+    ];
+  }
+
   private function modulVersion(): string {
     try {
       $info = $this->moduleList->getExtensionInfo('woar_monitor');
