@@ -31,8 +31,8 @@ final class StatusController extends ControllerBase {
   public const STATE_LAST_REQUEST = 'woar_monitor.last_request_at';
 
   public function __construct(
-    private readonly StatusCollector $collector,
-    private readonly StateInterface $state,
+    protected StatusCollector $collector,
+    protected StateInterface $state,
   ) {}
 
   /**

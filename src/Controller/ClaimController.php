@@ -38,9 +38,9 @@ final class ClaimController extends ControllerBase {
    *   Für Kennung und Namen der Website in der Antwort.
    */
   public function __construct(
-    private readonly PairingService $pairing,
-    private readonly FloodInterface $flood,
-    private readonly ConfigFactoryInterface $einstellungen,
+    protected PairingService $pairing,
+    protected FloodInterface $flood,
+    protected ConfigFactoryInterface $einstellungen,
   ) {}
 
   /**

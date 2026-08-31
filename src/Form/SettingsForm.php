@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\woar_monitor\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Datetime\DateFormatterInterface;
@@ -24,6 +26,11 @@ final class SettingsForm extends ConfigFormBase {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   Zugriff auf die Konfiguration.
+   * @param \Drupal\Core\Config\TypedConfigManagerInterface $typedConfigManager
+   *   Seit Drupal 10.2 erwartet die Basisklasse dieses zweite Argument; in
+   *   Drupal 11 ist es Pflicht. Unter 10.0 und 10.1 nimmt der Elternaufruf ein
+   *   Argument zu viel entgegen, was PHP stillschweigend verwirft — die
+   *   Signatur ist damit für beide Zweige richtig.
    * @param \Drupal\Core\State\StateInterface $state
    *   Ablage des Tokens. Bewusst State und nicht Konfiguration, damit das
    *   Token nicht im Konfigurationsexport landet.
@@ -33,12 +40,17 @@ final class SettingsForm extends ConfigFormBase {
    *   Kopplung mit der Zentrale über einen kurzlebigen Code.
    */
   public function __construct(
-    $config_factory,
-    private readonly StateInterface $state,
-    private readonly DateFormatterInterface $dateFormatter,
-    private readonly PairingService $pairing,
+    ConfigFactoryInterface $config_factory,
+    TypedConfigManagerInterface $typedConfigManager,
+    // Bewusst protected und ohne readonly: Formulare werden über den
+    // DependencySerializationTrait serialisiert, und der kommt mit privaten
+    // Eigenschaften nicht zurecht. Zusammen mit readonly bricht das unterhalb
+    // von PHP 8.4 beim Aufwachen — sichtbar zum Beispiel bei AJAX.
+    protected StateInterface $state,
+    protected DateFormatterInterface $dateFormatter,
+    protected PairingService $pairing,
   ) {
-    parent::__construct($config_factory);
+    parent::__construct($config_factory, $typedConfigManager);
   }
 
   /**
@@ -47,6 +59,7 @@ final class SettingsForm extends ConfigFormBase {
   public static function create(ContainerInterface $container): self {
     return new self(
       $container->get('config.factory'),
+      $container->get('config.typed'),
       $container->get('state'),
       $container->get('date.formatter'),
       $container->get('woar_monitor.pairing'),
