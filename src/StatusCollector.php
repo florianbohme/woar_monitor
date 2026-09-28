@@ -19,7 +19,7 @@ use Drupal\update\UpdateManagerInterface;
  * 1. Es wird nur gelesen. Keine Methode hier verändert etwas am System.
  *
  * 2. Es wird nichts über die Umgebung preisgegeben. Keine Pfade, keine
- *    Datenbankangaben, keine Benutzer, keine E-Mail-Adressen, kein Sitename,
+ *    Zugangsdaten zur Datenbank, keine Benutzer, keine E-Mail-Adressen, kein Sitename,
  *    keine geladenen PHP-Erweiterungen. Was hier hinausgeht, ist:
  *    Versionsnummern, Modulnamen, Update-Stand, Zeitpunkte. Nichts davon hilft
  *    jemandem beim Einbruch, der nicht ohnehin schon drin ist.
@@ -32,7 +32,7 @@ final class StatusCollector {
    * Erhöhen, sobald sich die Struktur ändert. Die Zentrale kann daran
    * erkennen, ob sie mit einem älteren Modul spricht.
    */
-  public const SCHEMA_VERSION = 5;
+  public const SCHEMA_VERSION = 6;
 
   public function __construct(
     private readonly StateInterface $state,
@@ -40,6 +40,7 @@ final class StatusCollector {
     private readonly ModuleExtensionList $moduleList,
     private readonly ConfigFactoryInterface $configFactory,
     private readonly FormStatsCollector $formStats,
+    private readonly DatabaseSizeCollector $databaseSize,
   ) {}
 
   /**
@@ -73,6 +74,9 @@ final class StatusCollector {
       // Anzahl eingegangener Formularanfragen je Monat. Nur Zahlen, keine
       // Inhalte — siehe FormStatsCollector.
       'forms' => $this->formStats->collect(),
+      // Größe der Datenbank und ihrer größten Tabellen. Nur Namen und
+      // Zahlen — siehe DatabaseSizeCollector.
+      'database' => $this->databaseSize->collect(),
     ];
   }
 

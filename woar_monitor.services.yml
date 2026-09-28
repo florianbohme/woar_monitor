@@ -16,6 +16,11 @@ services:
       - '@database'
       - '@module_handler'
 
+  woar_monitor.database_size:
+    class: Drupal\woar_monitor\DatabaseSizeCollector
+    arguments:
+      - '@database'
+
   woar_monitor.status_collector:
     class: Drupal\woar_monitor\StatusCollector
     arguments:
@@ -24,6 +29,7 @@ services:
       - '@extension.list.module'
       - '@config.factory'
       - '@woar_monitor.form_stats'
+      - '@woar_monitor.database_size'
 
   woar_monitor.pairing:
     class: Drupal\woar_monitor\PairingService
