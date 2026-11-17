@@ -103,10 +103,17 @@ Einstellungen. Der Grund: Ohne diese Liste ließe sich erst dann festlegen,
 dass ein Bewerbungsformular nicht als Anfrage zählt, wenn die erste Bewerbung
 schon eingegangen ist. Die hat die Zahl dann bereits verfälscht.
 
-Fehlt das Modul `webform`, steht `available: false` und beide Listen sind leer.
+`confirmations` sagt je Formular, wohin es nach dem Absenden geht: die Art der
+Bestätigung (`url`, `page`, `inline`, `message` …) und bei einer Weiterleitung
+die Adresse, etwa `/danke-fuer-ihre-nachricht?anfrage=ok`. Daraus richtet die
+Zentrale das Anfrage-Ziel in Matomo und den Auslöser im Tag Manager ein und
+prüft, ob jede Danke-Seite gezählt wird. Das ist eine Einstellung des
+Formulars, kein Inhalt einer Einsendung.
+
+Fehlt das Modul `webform`, steht `available: false` und alle Listen sind leer.
 Das ist kein Fehler — nicht jede Website hat Formulare.
 
-Was der Endpunkt **nicht** liefert: Pfade, Datenbankangaben, Benutzer,
+Was der Endpunkt **nicht** liefert: Dateipfade, Datenbankangaben, Benutzer,
 E-Mail-Adressen, den Sitenamen, geladene PHP-Erweiterungen, Konfigurationswerte.
 Wer die Antwort abfängt, erfährt Versionsnummern und Modulnamen — mehr nicht.
 

@@ -104,7 +104,71 @@ final class FormStatsCollector {
       // Formular nicht als Anfrage zählt, wenn die erste Einsendung schon
       // da ist — und die hat die Zahl dann bereits verfälscht.
       'known' => $this->alleFormulare(),
+      // Wohin jedes Formular nach dem Absenden geht. Daraus richtet die
+      // Zentrale das Anfrage-Ziel in Matomo und den Auslöser im Tag Manager
+      // ein und prüft, ob jede Danke-Seite mitgezählt wird.
+      'confirmations' => $this->bestaetigungen(),
     ];
+  }
+
+  /**
+   * Je Formular die Art der Bestätigung und die Adresse, auf die es danach
+   * weiterleitet. Nur Einstellungen, keine Einsendungen.
+   *
+   * @return array<string, array{type: string, url: ?string}>
+   */
+  private function bestaetigungen(): array {
+    try {
+      $formulare = \Drupal::entityTypeManager()->getStorage('webform')->loadMultiple();
+    }
+    catch (\Throwable) {
+      return [];
+    }
+
+    $liste = [];
+
+    foreach ($formulare as $id => $webform) {
+      $id = (string) $id;
+
+      if ($id === '' || str_starts_with($id, 'webform_')) {
+        continue;
+      }
+
+      try {
+        $typ = (string) ($webform->getSetting('confirmation_type') ?: 'page');
+        $url = NULL;
+
+        if (in_array($typ, ['url', 'url_message'], TRUE)) {
+          $url = trim((string) $webform->getSetting('confirmation_url'));
+          // Interne Pfade und Routen in einen Pfad wandeln, wie ihn der Browser sieht.
+          if ($url !== '' && !preg_match('#^https?://#', $url) && !str_starts_with($url, '/')) {
+            $url = '/' . ltrim($url, '/');
+          }
+          if (str_starts_with((string) $url, '/')) {
+            [$pfad, $abfrage] = array_pad(explode('?', (string) $url, 2), 2, NULL);
+            $alias = \Drupal::service('path_alias.manager')->getAliasByPath($pfad);
+            $url = $alias . ($abfrage !== NULL ? '?' . $abfrage : '');
+          }
+        }
+        elseif ($typ === 'page') {
+          // Eigene Bestätigungsseite von Webform.
+          $url = '/webform/' . $id . '/confirmation';
+        }
+
+        $liste[$id] = ['type' => mb_substr($typ, 0, 32), 'url' => $url !== NULL && $url !== '' ? mb_substr($url, 0, 255) : NULL];
+      }
+      catch (\Throwable) {
+        // Ein Formular mit kaputten Einstellungen soll den Rest nicht verhindern.
+      }
+
+      if (count($liste) >= 50) {
+        break;
+      }
+    }
+
+    ksort($liste);
+
+    return $liste;
   }
 
   /**
@@ -172,6 +236,7 @@ final class FormStatsCollector {
       'by_month' => [],
       'by_form' => [],
       'known' => [],
+      'confirmations' => [],
     ];
   }
 
